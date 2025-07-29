@@ -165,8 +165,8 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="addBillForm" data-ajax="true" action="/api/bills">
-                <div class="modal-body">
+            <div class="modal-body">
+                <form id="addBillForm" data-ajax="true" action="/api/bills" method="POST">
                     <div class="mb-3">
                         <label for="billName" class="form-label">Bill Name</label>
                         <input type="text" class="form-control" id="billName" name="name" required

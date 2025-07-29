@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - {{ app_name }}{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-cog me-2"></i>User Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="userSettingsForm" data-ajax="true" action="/api/settings/user">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" 
+                                       value="{{ session.username }}" disabled>
+                                <small class="text-muted">Username cannot be changed</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ settings.get('email', '') }}" placeholder="your.email@example.com">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="currency" class="form-label">Default Currency</label>
+                                <select class="form-control" id="currency" name="currency">
+                                    <option value="USD" {{ 'selected' if settings.get('currency') == 'USD' else '' }}>USD ($)</option>
+                                    <option value="EUR" {{ 'selected' if settings.get('currency') == 'EUR' else '' }}>EUR (€)</option>
+                                    <option value="GBP" {{ 'selected' if settings.get('currency') == 'GBP' else '' }}>GBP (£)</option>
+                                    <option value="CAD" {{ 'selected' if settings.get('currency') == 'CAD' else '' }}>CAD ($)</option>
+                                    <option value="AUD" {{ 'selected' if settings.get('currency') == 'AUD' else '' }}>AUD ($)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="timezone" class="form-label">Timezone</label>
+                                <select class="form-control" id="timezone" name="timezone">
+                                    <option value="America/New_York" {{ 'selected' if settings.get('timezone') == 'America/New_York' else '' }}>Eastern Time</option>
+                                    <option value="America/Chicago" {{ 'selected' if settings.get('timezone') == 'America/Chicago' else '' }}>Central Time</option>
+                                    <option value="America/Denver" {{ 'selected' if settings.get('timezone') == 'America/Denver' else '' }}>Mountain Time</option>
+                                    <option value="America/Los_Angeles" {{ 'selected' if settings.get('timezone') == 'America/Los_Angeles' else '' }}>Pacific Time</option>
+                                    <option value="UTC" {{ 'selected' if settings.get('timezone') == 'UTC' else '' }}>UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Notification Preferences</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications" name="email_notifications"
+                                   {{ 'checked' if settings.get('email_notifications') == 'true' else '' }}>
+                            <label class="form-check-label" for="emailNotifications">
+                                Email notifications for upcoming bills
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="browserNotifications" name="browser_notifications"
+                                   {{ 'checked' if settings.get('browser_notifications') == 'true' else '' }}>
+                            <label class="form-check-label" for="browserNotifications">
+                                Browser notifications
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="billReminder" class="form-label">Bill Reminder Days</label>
+                        <select class="form-control" id="billReminder" name="bill_reminder_days">
+                            <option value="1" {{ 'selected' if settings.get('bill_reminder_days') == '1' else '' }}>1 day before</option>
+                            <option value="3" {{ 'selected' if settings.get('bill_reminder_days') == '3' else '' }}>3 days before</option>
+                            <option value="7" {{ 'selected' if settings.get('bill_reminder_days') == '7' else '' }}>1 week before</option>
+                            <option value="14" {{ 'selected' if settings.get('bill_reminder_days') == '14' else '' }}>2 weeks before</option>
+                        </select>
+                        <small class="text-muted">How many days before due date to send reminders</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-key me-2"></i>Change Password
+                </h5>
+            </div>
+            <div class="card-body">
+                <form id="passwordForm" data-ajax="true" action="/api/settings/password">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="currentPassword" name="current_password" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" 
+                               required minlength="6">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Application Info
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>{{ app_name }}</strong>
+                    <br>
+                    <small class="text-muted">Version {{ app_version }}</small>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-user me-2"></i>
+                        Logged in as: <strong>{{ session.username }}</strong>
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-2"></i>
+                        Current year: {{ current_year }}
+                    </small>
+                </div>
+                
+                {% if session.is_admin %}
+                <div class="mb-3">
+                    <span class="badge bg-primary">
+                        <i class="fas fa-crown me-1"></i>Administrator
+                    </span>
+                </div>
+                {% endif %}
+                
+                <hr>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-light btn-sm" onclick="exportData()">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="clearCache()">
+                        <i class="fas fa-broom me-2"></i>Clear Cache
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-life-ring me-2"></i>Support
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-book me-2"></i>
+                        <a href="#" class="text-decoration-none">Documentation</a>
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-bug me-2"></i>
+                        <a href="#" class="text-decoration-none">Report Issues</a>
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fab fa-github me-2"></i>
+                        <a href="https://github.com/admin9705/budget101" class="text-decoration-none" target="_blank">
+                            View Source
+                        </a>
+                    </small>
+                </div>
+                
+                <div class="mb-0">
+                    <small class="text-muted">
+                        <i class="fas fa-heart me-2 text-danger"></i>
+                        Made with love for budget management
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        {% if session.is_admin %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>Admin Tools
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-info btn-sm" onclick="viewLogs()">
+                        <i class="fas fa-file-alt me-2"></i>View Logs
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="manageUsers()">
+                        <i class="fas fa-users me-2"></i>Manage Users
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="backupDatabase()">
+                        <i class="fas fa-database me-2"></i>Backup Database
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Password confirmation validation
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('newPassword').value;
+        const confirmPassword = this.value;
+        
+        if (password !== confirmPassword) {
+            this.setCustomValidity('Passwords do not match');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    document.getElementById('newPassword').addEventListener('input', function() {
+        const confirmPassword = document.getElementById('confirmPassword');
+        if (confirmPassword.value) {
+            confirmPassword.dispatchEvent(new Event('input'));
+        }
+    });
+    
+    // Settings functions
+    function exportData() {
+        Budget101.showToast('Export functionality coming soon!', 'info');
+    }
+    
+    function clearCache() {
+        if (confirm('Are you sure you want to clear the cache?')) {
+            localStorage.clear();
+            sessionStorage.clear();
+            Budget101.showToast('Cache cleared successfully!', 'success');
+        }
+    }
+    
+    function viewLogs() {
+        Budget101.showToast('Log viewing functionality coming soon!', 'info');
+    }
+    
+    function manageUsers() {
+        Budget101.showToast('User management functionality coming soon!', 'info');
+    }
+    
+    function backupDatabase() {
+        Budget101.showToast('Database backup functionality coming soon!', 'info');
+    }
+    
+    // Request notification permission
+    document.getElementById('browserNotifications').addEventListener('change', function() {
+        if (this.checked && 'Notification' in window) {
+            Notification.requestPermission().then(function(permission) {
+                if (permission !== 'granted') {
+                    document.getElementById('browserNotifications').checked = false;
+                    Budget101.showToast('Notification permission denied', 'warning');
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

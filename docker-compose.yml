@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  budget101:
+    build: .
+    container_name: budget101
+    restart: unless-stopped
+    ports:
+      - "9715:9715"
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=America/New_York
+      - DATABASE_PATH=/config/budget101.db
+      - CONFIG_FILE=/config/config.yml
+      - SECRET_KEY=${SECRET_KEY:-}
+      - DEBUG=false
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:9715/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Alternative using published image
+# services:
+#   budget101:
+#     image: admin9705/budget101:latest
+#     container_name: budget101
+#     restart: unless-stopped
+#     ports:
+#       - "9715:9715"
+#     volumes:
+#       - ./config:/config
+#     environment:
+#       - TZ=America/New_York
+#       - DATABASE_PATH=/config/budget101.db
+#       - CONFIG_FILE=/config/config.yml
+#       - SECRET_KEY=${SECRET_KEY:-}
+#       - DEBUG=false 

@@ -1,0 +1,88 @@
+# Budget101 Configuration File
+# Copy this file to config.yml and modify as needed
+
+# Application Settings
+app_name: "Budget101"
+version: "1.0.0"
+debug: false
+
+# Database Settings
+database:
+  path: "/config/budget101.db"
+  backup_enabled: true
+  backup_retention_days: 30
+
+# Security Settings
+security:
+  secret_key: "" # Leave empty to auto-generate
+  session_timeout_hours: 24
+  max_login_attempts: 5
+  lockout_duration_minutes: 15
+
+# Email Settings (for notifications)
+email:
+  enabled: false
+  smtp_server: "smtp.gmail.com"
+  smtp_port: 587
+  smtp_username: ""
+  smtp_password: ""
+  from_address: ""
+  use_tls: true
+
+# Notification Settings
+notifications:
+  email_enabled: false
+  browser_enabled: true
+  bill_reminder_days: 7
+  overdue_reminder_enabled: true
+  weekly_summary_enabled: true
+
+# Application Features
+features:
+  registration_enabled: true
+  multi_user_enabled: true
+  data_export_enabled: true
+  auto_backup_enabled: true
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  max_file_size_mb: 10
+  backup_count: 5
+  log_to_file: true
+  log_file_path: "/config/budget101.log"
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  requests_per_hour: 100
+  login_attempts_per_minute: 5
+  api_requests_per_minute: 30
+
+# Theme and UI
+ui:
+  default_currency: "USD"
+  default_timezone: "America/New_York"
+  items_per_page: 25
+  enable_animations: true
+  compact_mode: false
+
+# Backup Settings
+backup:
+  auto_backup_enabled: true
+  backup_schedule: "daily"  # daily, weekly, monthly
+  backup_time: "02:00"  # 24-hour format
+  max_backup_files: 10
+
+# Integration Settings
+integrations:
+  webhook_url: ""
+  webhook_enabled: false
+  api_enabled: true
+  
+# Advanced Settings
+advanced:
+  enable_debug_mode: false
+  enable_profiling: false
+  custom_css_path: ""
+  custom_js_path: "" 

@@ -66,6 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Loading state for buttons
     function addLoadingState(button) {
+        if (!button) {
+            return function() {}; // Return no-op function if button is null
+        }
+        
         const originalText = button.innerHTML;
         button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Loading...';
         button.disabled = true;
@@ -112,10 +116,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
-                }
+                },
+                credentials: 'same-origin' // Include session cookies
             };
 
-            return fetch(url, { ...defaultOptions, ...options })
+            // If body is provided but no method specified, default to POST
+            if (options.body && !options.method) {
+                options.method = 'POST';
+            }
+
+            const finalOptions = { ...defaultOptions, ...options };
+            console.log('API Request - URL:', url, 'Options:', finalOptions);
+
+            return fetch(url, finalOptions)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -179,11 +192,22 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            const submitButton = form.querySelector('button[type="submit"]');
-            const resetLoading = addLoadingState(submitButton);
+            
+            // Find submit button - either inside form or outside with form attribute
+            let submitButton = form.querySelector('button[type="submit"]');
+            if (!submitButton && form.id) {
+                submitButton = document.querySelector(`button[type="submit"][form="${form.id}"]`);
+            }
+            
+            let resetLoading = function() {}; // Default no-op function
+            if (submitButton) {
+                resetLoading = addLoadingState(submitButton);
+            }
             
             const action = form.action || window.location.pathname;
-            const method = form.method || 'POST';
+            const method = (form.method && form.method.toUpperCase()) || 'POST';
+            
+            console.log('Form submission - Action:', action, 'Method:', method, 'Data:', data);
             
             Budget101.apiRequest(action, {
                 method: method,
@@ -193,15 +217,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 Budget101.showToast('Success!', 'success');
                 form.reset();
                 
+                // Close modal if it exists
+                const modal = form.closest('.modal');
+                if (modal) {
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    if (bsModal) {
+                        bsModal.hide();
+                    }
+                }
+                
                 // Reload page or update content as needed
                 if (response.redirect) {
                     window.location.href = response.redirect;
                 } else if (response.reload) {
                     window.location.reload();
+                } else {
+                    // Default to reload for successful submissions
+                    window.location.reload();
                 }
             })
             .catch(error => {
                 console.error('Form submission error:', error);
+                Budget101.showToast('An error occurred. Please try again.', 'danger');
             })
             .finally(() => {
                 resetLoading();

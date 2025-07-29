@@ -35,6 +35,12 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('income') }}" class="nav-link {% if request.endpoint == 'income' %}active{% endif %}">
+                        <i class="fas fa-wallet me-2"></i>
+                        Income
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('bills') }}" class="nav-link {% if request.endpoint == 'bills' %}active{% endif %}">
                         <i class="fas fa-file-invoice-dollar me-2"></i>
                         Bills

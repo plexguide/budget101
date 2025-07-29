@@ -57,6 +57,26 @@ def init_db():
             )
         ''')
         
+        # Income table
+        db.execute('''
+            CREATE TABLE IF NOT EXISTS income (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                amount DECIMAL(10,2) NOT NULL,
+                frequency TEXT NOT NULL,
+                frequency_day INTEGER,
+                earner_name TEXT NOT NULL,
+                earner_type TEXT NOT NULL,
+                start_date DATE,
+                end_date DATE,
+                is_active BOOLEAN DEFAULT TRUE,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        ''')
+        
         # Bills table
         db.execute('''
             CREATE TABLE IF NOT EXISTS bills (
@@ -228,6 +248,16 @@ def logout():
 def index():
     return render_template('pages/home.html')
 
+@app.route('/income')
+@login_required
+def income():
+    db = get_db()
+    incomes = db.execute(
+        'SELECT * FROM income WHERE user_id = ? ORDER BY created_at DESC',
+        (session['user_id'],)
+    ).fetchall()
+    return render_template('pages/income.html', incomes=incomes)
+
 @app.route('/bills')
 @login_required
 def bills():
@@ -261,6 +291,22 @@ def settings():
     return render_template('pages/settings.html', settings=settings_dict)
 
 # API routes for dynamic content
+@app.route('/api/income', methods=['POST'])
+@login_required
+def add_income():
+    data = request.get_json()
+    
+    db = get_db()
+    db.execute(
+        'INSERT INTO income (user_id, name, amount, frequency, frequency_day, earner_name, earner_type, start_date, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        (session['user_id'], data['name'], data['amount'], data['frequency'], 
+         data.get('frequency_day'), data['earner_name'], data['earner_type'], 
+         data.get('start_date'), data.get('notes'))
+    )
+    db.commit()
+    
+    return jsonify({'status': 'success'})
+
 @app.route('/api/bills', methods=['POST'])
 @login_required
 def add_bill():

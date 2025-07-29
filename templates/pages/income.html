@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}Income - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-wallet me-3"></i>Income Management
+                </h1>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addIncomeModal">
+                    <i class="fas fa-plus me-2"></i>Add Income Source
+                </button>
+            </div>
+
+            <!-- Income Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-darker border-0 h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-success">
+                                <i class="fas fa-coins me-2"></i>Total Income Sources
+                            </h5>
+                            <h2 class="text-success" id="totalIncomes">{{ incomes|length }}</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-darker border-0 h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-info">
+                                <i class="fas fa-calendar-alt me-2"></i>Monthly Estimate
+                            </h5>
+                            <h2 class="text-info" id="monthlyEstimate">$0.00</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-darker border-0 h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-warning">
+                                <i class="fas fa-calendar-year me-2"></i>Annual Estimate
+                            </h5>
+                            <h2 class="text-warning" id="annualEstimate">$0.00</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-darker border-0 h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-primary">
+                                <i class="fas fa-users me-2"></i>Active Earners
+                            </h5>
+                            <h2 class="text-primary" id="activeEarners">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Search -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control" placeholder="Search income sources..." 
+                               data-search="incomeTable" id="incomeSearch">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Income Table -->
+            <div class="card bg-darker border-0">
+                <div class="card-header bg-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Income Sources
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if incomes %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover" id="incomeTable">
+                            <thead>
+                                <tr>
+                                    <th>Income Source</th>
+                                    <th>Amount</th>
+                                    <th>Frequency</th>
+                                    <th>Earner</th>
+                                    <th>Type</th>
+                                    <th>Next Payment</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for income in incomes %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ income.name }}</strong>
+                                        {% if income.notes %}
+                                        <br><small class="text-muted">{{ income.notes[:50] }}{% if income.notes|length > 50 %}...{% endif %}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-success">${{ "%.2f"|format(income.amount) }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ income.frequency }}</span>
+                                        {% if income.frequency_day %}
+                                        <br><small class="text-muted">Day {{ income.frequency_day }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ income.earner_name }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ income.earner_type }}</span>
+                                    </td>
+                                    <td>
+                                        <span id="nextPayment_{{ income.id }}" class="text-muted">Calculating...</span>
+                                    </td>
+                                    <td>
+                                        {% if income.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary btn-sm" data-action="edit" data-income-id="{{ income.id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm" data-action="toggle" data-income-id="{{ income.id }}">
+                                                <i class="fas fa-power-off"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm" data-action="delete" data-income-id="{{ income.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-wallet fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No Income Sources Yet</h4>
+                        <p class="text-muted">Get started by adding your income information</p>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addIncomeModal">
+                            <i class="fas fa-plus me-2"></i>Add Your First Income Source
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Income Modal -->
+<div class="modal fade" id="addIncomeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Add Income Source
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addIncomeForm" data-ajax="true" action="/api/income" method="POST">
+                    <div class="row">
+                        <!-- Income Source Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="incomeName" class="form-label">Income Source Name</label>
+                            <input type="text" class="form-control" id="incomeName" name="name" required
+                                   placeholder="e.g., Salary, Freelance, Rental Income">
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="col-md-6 mb-3">
+                            <label for="incomeAmount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="incomeAmount" name="amount"
+                                       step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <!-- Frequency -->
+                        <div class="col-md-6 mb-3">
+                            <label for="incomeFrequency" class="form-label">Frequency</label>
+                            <select class="form-control" id="incomeFrequency" name="frequency" required>
+                                <option value="">Select frequency...</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="bi_weekly">Bi-Weekly (Every 2 weeks)</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="first_of_month">1st of the Month</option>
+                                <option value="last_of_month">Last of the Month</option>
+                                <option value="specific_day">Specific Day of Month</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="bi_annually">Bi-Annually (Every 6 months)</option>
+                                <option value="annually">Annually</option>
+                            </select>
+                        </div>
+
+                        <!-- Specific Day (conditional) -->
+                        <div class="col-md-6 mb-3" id="specificDayGroup" style="display: none;">
+                            <label for="frequencyDay" class="form-label">Day of Month</label>
+                            <select class="form-control" id="frequencyDay" name="frequency_day">
+                                <option value="">Select day...</option>
+                                {% for day in range(1, 32) %}
+                                <option value="{{ day }}">{{ day }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Earner Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="earnerName" class="form-label">Earner Name</label>
+                            <input type="text" class="form-control" id="earnerName" name="earner_name" required
+                                   placeholder="e.g., John Doe, Jane Smith">
+                        </div>
+
+                        <!-- Earner Type -->
+                        <div class="col-md-6 mb-3">
+                            <label for="earnerType" class="form-label">Earner Type</label>
+                            <select class="form-control" id="earnerType" name="earner_type" required>
+                                <option value="">Select type...</option>
+                                <option value="self">Self</option>
+                                <option value="spouse">Spouse</option>
+                                <option value="partner">Partner</option>
+                                <option value="child">Child</option>
+                                <option value="family_member">Other Family Member</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">Start Date (Optional)</label>
+                            <input type="date" class="form-control" id="startDate" name="start_date">
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="col-12 mb-3">
+                            <label for="incomeNotes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="incomeNotes" name="notes" rows="3"
+                                      placeholder="Any additional details about this income source..."></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="submit" form="addIncomeForm" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Add Income Source
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle frequency selection to show/hide specific day
+    const frequencySelect = document.getElementById('incomeFrequency');
+    const specificDayGroup = document.getElementById('specificDayGroup');
+    
+    if (frequencySelect) {
+        frequencySelect.addEventListener('change', function() {
+            if (this.value === 'specific_day') {
+                specificDayGroup.style.display = 'block';
+                document.getElementById('frequencyDay').required = true;
+            } else {
+                specificDayGroup.style.display = 'none';
+                document.getElementById('frequencyDay').required = false;
+            }
+        });
+    }
+
+    // Handle income action buttons
+    document.addEventListener('click', function(e) {
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
+            const action = actionBtn.getAttribute('data-action');
+            const incomeId = actionBtn.getAttribute('data-income-id');
+            
+            switch (action) {
+                case 'edit':
+                    editIncome(incomeId);
+                    break;
+                case 'toggle':
+                    toggleIncomeStatus(incomeId);
+                    break;
+                case 'delete':
+                    deleteIncome(incomeId);
+                    break;
+            }
+        }
+    });
+
+    // Calculate estimates
+    calculateIncomeEstimates();
+});
+
+function calculateIncomeEstimates() {
+    // This would calculate monthly and annual estimates
+    // For now, placeholder values
+    document.getElementById('monthlyEstimate').textContent = '$0.00';
+    document.getElementById('annualEstimate').textContent = '$0.00';
+    document.getElementById('activeEarners').textContent = '{{ incomes|selectattr("is_active")|list|length }}';
+}
+
+// Placeholder functions for income management
+function editIncome(incomeId) {
+    Budget101.showToast('Edit income functionality coming soon!', 'info');
+}
+
+function toggleIncomeStatus(incomeId) {
+    Budget101.showToast('Toggle income status functionality coming soon!', 'info');
+}
+
+function deleteIncome(incomeId) {
+    if (confirm('Are you sure you want to delete this income source?')) {
+        Budget101.showToast('Delete income functionality coming soon!', 'info');
+    }
+}
+</script>
+{% endblock %} 
